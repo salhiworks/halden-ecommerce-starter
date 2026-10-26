@@ -41,7 +41,7 @@ export default async function LoginPage() {
             {state.reason}
           </Notice>
           <p className="text-sm text-ink-2">
-            Follow <strong>“Go live with Supabase”</strong> in the README: on your computer, run{" "}
+            Follow step 2, <strong>“Connect Supabase”</strong>, in the README: on your computer, run{" "}
             <code className="rounded bg-canvas px-1">npm run setup</code>, which prepares the database and writes the keys
             to <code className="rounded bg-canvas px-1">.env.local</code>. On a host, add the same keys to its environment
             variables and restart the app.

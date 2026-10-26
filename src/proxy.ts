@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { backendKind, supabaseConfig } from "@/server/env";
 
 /**
  * Keeps the dashboard's Supabase session fresh.
@@ -13,12 +14,12 @@ import { NextResponse, type NextRequest } from "next/server";
  * expire mid-visit.
  */
 export async function proxy(request: NextRequest) {
-  const url = process.env.SUPABASE_URL?.trim();
-  const key = (process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY)?.trim();
-  if (!url || !key || process.env.STORE_BACKEND === "local") return NextResponse.next();
+  // Same settings, same rules as the rest of the app (src/server/env.ts).
+  const config = backendKind() === "supabase" ? supabaseConfig() : null;
+  if (!config) return NextResponse.next();
 
   let response = NextResponse.next({ request });
-  const supabase = createServerClient(url, key, {
+  const supabase = createServerClient(config.url, config.publishableKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll();

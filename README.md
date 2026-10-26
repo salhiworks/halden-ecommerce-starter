@@ -8,21 +8,73 @@ It opens as **Halden**, a fictional demo store with 30 products, so you can try 
 
 ---
 
+## Get your store online in three steps
+
+You need [Node.js](https://nodejs.org) 20.9 or newer and a free [Supabase](https://supabase.com) account — plus a Hostinger plan with Node.js hosting for step 3.
+
+### 1. Start it on your computer
+
+```bash
+npm install
+npm run dev
+```
+
+Open <http://localhost:3000> — that's the Halden demo store. Nothing to configure yet: until you connect Supabase, the store saves everything in a `.data/` folder on your computer.
+
+### 2. Connect Supabase
+
+1. Create a project at [supabase.com/dashboard](https://supabase.com/dashboard).
+2. Sign the Supabase CLI in — once per computer. It opens your browser:
+
+   ```bash
+   npx supabase login
+   ```
+
+3. Run the setup and answer its questions:
+
+   ```bash
+   npm run setup
+   ```
+
+   It prepares the database, saves your project's three keys in a file called `.env.local`, adds the 30 demo products, creates your admin account and turns off public sign-ups. Keys are never shown on screen, and you can run it again at any time.
+
+4. Stop `npm run dev` (Ctrl+C), start it again, and sign in at <http://localhost:3000/admin>.
+
+### 3. Deploy to Hostinger
+
+1. Put the project on GitHub (or zip it).
+2. In hPanel, add a **Node.js** website and connect the repository (or upload the zip). Hostinger recognises Next.js and fills in the build settings — keep them. The build command is `npm run build`.
+3. Under **Environment variables**, add these three. Copy each value from your `.env.local` file — it's in the project folder; open it in your code editor, since Finder and Explorer hide files whose name starts with a dot:
+
+   | Name | Value |
+   | --- | --- |
+   | `SUPABASE_URL` | from `.env.local` |
+   | `SUPABASE_PUBLISHABLE_KEY` | from `.env.local` |
+   | `SUPABASE_SECRET_KEY` | from `.env.local` — keep it secret |
+
+   That's all the store needs. Hostinger may list other names it finds in the code; you don't need them ([what they are](docs/advanced-configuration.md)).
+
+4. Deploy. Open `https://your-domain/admin`, sign in, and set **Settings → Store → Shop address** to your site's address.
+
+Your store is live. Everything else — store name, logo, currency, WhatsApp number, checkout methods, delivery, colours, the homepage — is set in the dashboard.
+
+---
+
 ## Contents
 
-1. [What you get](#what-you-get)
-2. [Run it on your computer](#run-it-on-your-computer)
-3. [Connect Supabase](#connect-supabase)
-4. [Create your admin account](#create-your-admin-account)
-5. [How ordering works](#how-ordering-works)
-6. [Deploy to Hostinger](#deploy-to-hostinger)
+1. [Get your store online in three steps](#get-your-store-online-in-three-steps)
+2. [What you get](#what-you-get)
+3. [Your admin account](#your-admin-account)
+4. [How ordering works](#how-ordering-works)
+5. [More about Supabase](#more-about-supabase)
+6. [More about Hostinger](#more-about-hostinger)
 7. [Customize it](#customize-it)
-8. [Public demo mode](#public-demo-mode)
-9. [How the code is organized](#how-the-code-is-organized)
-10. [Commands](#commands)
-11. [Tests](#tests)
-12. [Security and privacy](#security-and-privacy)
-13. [Troubleshooting](#troubleshooting)
+8. [How the code is organized](#how-the-code-is-organized)
+9. [Commands](#commands)
+10. [Tests](#tests)
+11. [Security and privacy](#security-and-privacy)
+12. [Troubleshooting](#troubleshooting)
+13. [Advanced configuration](docs/advanced-configuration.md)
 
 ---
 
@@ -54,68 +106,9 @@ It opens as **Halden**, a fictional demo store with 30 products, so you can try 
 
 ---
 
-## Run it on your computer
+## Your admin account
 
-You need [Node.js](https://nodejs.org) 20.9 or newer.
-
-```bash
-npm install
-npm run dev
-```
-
-Open <http://localhost:3000>: the shop is the Halden demo store. Open <http://localhost:3000/admin/setup> to create your owner account, then explore the dashboard.
-
-This runs on the **local store**: everything is saved in a `.data/` folder (git ignores it). No account anywhere is needed. To start over with a fresh demo store: `npm run demo:reset` (your current data is moved to `.data-backups/`, never deleted).
-
----
-
-## Connect Supabase
-
-A live store keeps its products, orders and photos in [Supabase](https://supabase.com) — the free plan is enough to start — so redeploying the site never touches them.
-
-1. **Create a project** at [supabase.com/dashboard](https://supabase.com/dashboard). Pick a region close to your customers and keep the database password somewhere safe (setup doesn't need it).
-2. **Sign the Supabase CLI in** — once per computer. It opens your browser:
-
-   ```bash
-   npx supabase login
-   ```
-
-3. **Run the setup:**
-
-   ```bash
-   npm run setup
-   ```
-
-   It asks which project to use, then creates the database (tables, security rules, the photo bucket), saves the project's address and keys in `.env.local`, adds the 30 demo products if you want them, creates your admin account, and turns off public sign-ups. Keys are never shown on screen. You can run it again at any time.
-
-4. **Start the store:** `npm run dev`, then sign in at <http://localhost:3000/admin>.
-
-To check the project's security from the outside — what a shopper and a signed-in stranger can and can't do — run `npm run db:check`.
-
-Later, after updating the starter, `npm run db:migrate` applies any new database changes. `npm run db:seed` adds (or restores) the demo products; `npm run db:seed -- --remove` takes them out.
-
-<details>
-<summary><strong>Without the CLI</strong></summary>
-
-1. In Supabase → SQL Editor → New query, paste the whole of [`supabase/migrations/20261026000000_storefront_schema.sql`](supabase/migrations/20261026000000_storefront_schema.sql) and click Run. It is safe to run again.
-2. In Supabase → Project Settings → API keys, copy the keys into `.env.local` (see [`.env.example`](.env.example)):
-
-   ```bash
-   SUPABASE_URL=https://your-project.supabase.co
-   SUPABASE_PUBLISHABLE_KEY=sb_publishable_…
-   SUPABASE_SECRET_KEY=sb_secret_…
-   ```
-
-3. Create your admin account (next section), sign in, and use **Settings → Demo content → Add demo content** for the sample products.
-4. In Supabase → Authentication → Sign In / Providers, turn off "Allow new users to sign up".
-
-</details>
-
----
-
-## Create your admin account
-
-`npm run setup` does it. To add another admin, or reset a forgotten password:
+`npm run setup` creates it. To add another admin, or reset a forgotten password:
 
 ```bash
 npm run admin:create -- you@example.com
@@ -129,7 +122,7 @@ Or by hand: Supabase → Authentication → Users → Add user (tick "Auto confi
 select public.grant_admin('you@example.com');
 ```
 
-**On the local store**, open `/admin/setup` once. In production it also asks for `ADMIN_SETUP_TOKEN`, so whoever finds the address first can't claim the store; `npm run admin:create -- you@example.com --replace` resets a forgotten local password.
+**On the local store** (before you connect Supabase), open <http://localhost:3000/admin/setup> once to create the owner account.
 
 ---
 
@@ -163,32 +156,39 @@ Received ──▶ Confirmed ──▶ Fulfilled ──▶ Completed
 
 ---
 
-## Deploy to Hostinger
+## More about Supabase
 
-These steps use Hostinger's Node.js web hosting (Business and Cloud plans). Menu names in hPanel may differ slightly between plans.
+- `npm run db:check` checks your project's security from the outside — what a shopper and a signed-in stranger can and can't do. It changes nothing.
+- After updating the starter, `npm run db:migrate` applies any new database changes.
+- `npm run db:seed` adds or restores the demo products; `npm run db:seed -- --remove` takes them out. You can also do both from **Settings → Demo content** in the dashboard.
+- To start over with a fresh demo store on the local store: `npm run demo:reset` (your current data is moved to `.data-backups/`, never deleted).
 
-**Before you start:** connect Supabase as above, and put the project on GitHub (or have it ready as a zip).
+<details>
+<summary><strong>Without the CLI</strong></summary>
 
-1. In hPanel, add a **Node.js** website / app and connect your GitHub repository (or upload the files).
-2. Choose **Node.js 20 or 22**.
-3. Build command: `npm run build` · Start command: `npm start`.
-4. Add the **environment variables** — the values are in your `.env.local`:
+1. In Supabase → SQL Editor → New query, paste the whole of [`supabase/migrations/20261026000000_storefront_schema.sql`](supabase/migrations/20261026000000_storefront_schema.sql) and click Run. It is safe to run again.
+2. In Supabase → Project Settings → API keys, copy the keys into `.env.local` (see [`.env.example`](.env.example)):
 
-   | Variable | Value |
-   | --- | --- |
-   | `SUPABASE_URL` | `https://<your-project-ref>.supabase.co` |
-   | `SUPABASE_PUBLISHABLE_KEY` | from `.env.local` |
-   | `SUPABASE_SECRET_KEY` | from `.env.local` — keep it secret |
+   ```bash
+   SUPABASE_URL=https://your-project.supabase.co
+   SUPABASE_PUBLISHABLE_KEY=sb_publishable_…
+   SUPABASE_SECRET_KEY=sb_secret_…
+   ```
 
-5. Deploy. Open `/admin`, sign in, and set **Settings → Store → Shop address** to your final address (`https://shop.example.com`), so shared links and the sitemap always use it.
-6. Connect your domain and turn on SSL in hPanel.
+3. Create your admin account (see [Your admin account](#your-admin-account)), sign in, and use **Settings → Demo content → Add demo content** for the sample products.
+4. In Supabase → Authentication → Sign In / Providers, turn off "Allow new users to sign up".
 
-**Good to know**
+</details>
 
+---
+
+## More about Hostinger
+
+- Hostinger's Node.js web hosting (Business and Cloud plans) runs the store. Choose **Node.js 20 or 22**; the start command is `npm start` if you're asked for one. Menu names in hPanel may differ slightly between plans.
+- Connect your domain and turn on SSL in hPanel.
+- If you connected Supabase through Hostinger's database wizard, it has already added `SUPABASE_URL` and `SUPABASE_ANON_KEY` (the older name of the publishable key, which also works) — add `SUPABASE_SECRET_KEY` yourself.
 - The build uses webpack (`next build --webpack`), which works on build machines where Turbopack's native binary can't load.
-- Every page is rendered fresh, and the catalog is cached in memory for 30 seconds (`CATALOG_CACHE_SECONDS`). A save in the dashboard refreshes it at once.
 - Photos you upload are stored in Supabase Storage. If your Supabase project uses a custom domain, set `SUPABASE_URL` to it **before building** — the image settings read it at build time.
-- A production server without any database configured shows a setup message instead of quietly running on local files. To run the local store in production on purpose (a demo, say), set `STORE_BACKEND=local`, plus `STORE_DATA_DIR` outside the app folder, `ADMIN_SETUP_TOKEN` and `SESSION_SECRET`.
 - Run `npm run verify` before every deploy: it type-checks, lints, runs the tests and the privacy check, and builds.
 
 ---
@@ -196,6 +196,8 @@ These steps use Hostinger's Node.js web hosting (Business and Cloud plans). Menu
 ## Customize it
 
 **Without code** — the dashboard's Storefront and Settings pages. Changes are live as soon as you save.
+
+To let visitors try a copy of your store and look around its dashboard without changing anything, see *Public demo mode* in [Advanced configuration](docs/advanced-configuration.md).
 
 **With code**
 
@@ -205,19 +207,6 @@ These steps use Hostinger's Node.js web hosting (Business and Cloud plans). Menu
 - **Checkout rules**: `src/lib/domain/checkout.ts`. **The WhatsApp message**: `src/lib/domain/whatsapp.ts`. **Order states**: `src/lib/domain/orders.ts`.
 - **The demo store**: `src/lib/demo/` (settings, categories, products) and `public/demo/` (photos — see `public/demo/CREDITS.md`).
 - **The database**: `supabase/migrations/`. Add a new file for each change (`<timestamp>_<name>.sql`) and write it so it can safely run more than once, like the first one — `npm run db:migrate` applies them all, in order.
-
----
-
-## Public demo mode
-
-Want to show the store to the world — like the hosted Halden demo — and let anyone look inside the dashboard? Set `PUBLIC_DEMO_MODE=true` on that deployment:
-
-- A band above the shop says it is a demo, with a link to **explore the dashboard**.
-- Visitors open the dashboard as a **guest**: they can look at every page and try every control, but nothing is saved. They see sample orders made up for the preview, never real ones, and no account details.
-- Orders placed in the shop go all the way to the confirmation page but are kept in memory for an hour and never saved. Nothing is sent to anyone.
-- You still sign in with your admin account and manage the demo as usual. `npm run db:seed -- --settings` puts the demo products and settings back as they were.
-
-Never turn it on for a real store: its orders would not be saved.
 
 ---
 
@@ -279,9 +268,7 @@ tests/e2e/             end-to-end tests (Playwright)
 - `npm test` — business rules (pricing, variants, stock, cart, checkout validation, order lifecycle, WhatsApp messages, settings), the demo store and public demo mode, and the database: row-level security, permissions, the admin role and the atomic order functions, run on real Postgres.
 - `npm run test:e2e` — a production build in a real browser, on two throwaway local stores (one in public demo mode): owner setup, access control, products with photos and variants, categories, collections, settings reflected in the shop, Arabic right-to-left, every checkout method, the order lifecycle with stock, the guest dashboard preview, and no sideways scrolling from 320 px to 1440 px.
 
-  Playwright needs a browser once: `npx playwright install chromium` — or use an installed Chrome with `PLAYWRIGHT_CHANNEL=chrome npm run test:e2e`. Rerun without rebuilding: `npx playwright test`.
-
-  To run them against a real Supabase project instead (they clean up after themselves): `E2E_BACKEND=supabase E2E_ADMIN_EMAIL=… E2E_ADMIN_PASSWORD=… npx playwright test`, with the project's keys in `.env.local`.
+  Playwright needs a browser once: `npx playwright install chromium`. Rerun without rebuilding: `npx playwright test`. Running them against a real Supabase project is described in [Advanced configuration](docs/advanced-configuration.md).
 
 The end-to-end tests never contact WhatsApp or any other service.
 
@@ -289,7 +276,7 @@ The end-to-end tests never contact WhatsApp or any other service.
 
 ## Security and privacy
 
-- **Keys**: the Supabase secret key and every other secret stay on the server. No variable is `NEXT_PUBLIC_`. `.env*` files are ignored by git, except the empty template. Setup never prints a key.
+- **Keys**: the Supabase secret key stays on the server. No setting is `NEXT_PUBLIC_`, so nothing reaches a visitor's browser. `.env*` files are ignored by git, except the empty template. Setup never prints a key.
 - **Database**: row-level security on every table, and explicit permissions on top. The public key can read published products, visible categories and collections, and the settings — nothing else. Orders and the admin list are closed to it entirely; the server creates orders with the secret key. Only accounts listed in `admin_users` can change anything, and the dashboard queries Supabase *as the signed-in admin*, so the database checks the role a second time.
 - **Dashboard**: every page and every action checks the session itself. Never indexed by search engines, never framed.
 - **Checkout**: inputs validated on the server, prices and stock re-checked when the order is placed, a hidden field and a minimum fill time against bots, and per-visitor rate limits.
@@ -302,7 +289,7 @@ The end-to-end tests never contact WhatsApp or any other service.
 
 ## Troubleshooting
 
-**"The store can't reach its database" / "No database is configured"** — a Supabase variable is missing or wrong, or the database hasn't been set up. Run `npm run setup` (or `npm run db:migrate`). The dashboard's sign-in page says which.
+**"The store can't reach its database" / "No database is configured"** — one of the three Supabase variables is missing or wrong, or the database hasn't been set up. Run `npm run setup` (or `npm run db:migrate`), and check the three variables on your host. The dashboard's sign-in page says which.
 
 **`npm run setup` says you're not signed in** — run `npx supabase login` first.
 
@@ -316,7 +303,7 @@ The end-to-end tests never contact WhatsApp or any other service.
 
 **Forgot the admin password** — `npm run admin:create -- you@example.com` (add `--replace` on the local store).
 
-**`/admin/setup` says setup is locked** — the store runs in production on the local store without `ADMIN_SETUP_TOKEN`. Set it, restart, and enter it on the setup screen.
+**`/admin/setup` says setup is locked** — the store is running in production on the local store. Connect Supabase instead (or see [Advanced configuration](docs/advanced-configuration.md)).
 
 ---
 

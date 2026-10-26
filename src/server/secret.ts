@@ -2,7 +2,7 @@ import "server-only";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomToken, sha256 } from "@/server/crypto";
-import { localDataDir, supabaseConfig } from "@/server/env";
+import { localDataDir, sessionSecretSetting, supabaseConfig } from "@/server/env";
 
 /**
  * A server-side secret for signing short-lived values (the checkout form
@@ -13,8 +13,8 @@ let cached: string | null = null;
 
 export async function appSecret(): Promise<string> {
   if (cached) return cached;
-  const fromEnv = process.env.SESSION_SECRET?.trim();
-  if (fromEnv && fromEnv.length >= 32) return (cached = fromEnv);
+  const fromEnv = sessionSecretSetting();
+  if (fromEnv) return (cached = fromEnv);
 
   const supabase = supabaseConfig();
   if (supabase?.secretKey) return (cached = sha256(`storefront-form-tokens:${supabase.secretKey}`));

@@ -8,7 +8,7 @@ import { parseSettings, type StoreSettings } from "@/lib/domain/settings";
 import { applyStockDelta } from "@/lib/domain/stock";
 import type { Grouping, Order, OrderStatus, Product } from "@/lib/domain/types";
 import { hashPassword, randomToken, safeEqual, sign, verifyPassword } from "@/server/crypto";
-import { isProduction, localDataDir } from "@/server/env";
+import { adminSetupToken, isProduction, localDataDir, sessionSecretSetting } from "@/server/env";
 import {
   ConflictError,
   NotFoundError,
@@ -37,8 +37,8 @@ const SESSION_COOKIE = "store_admin";
 const SESSION_DAYS = 14;
 
 async function sessionSecret(): Promise<string> {
-  const fromEnv = process.env.SESSION_SECRET?.trim();
-  if (fromEnv && fromEnv.length >= 32) return fromEnv;
+  const fromEnv = sessionSecretSetting();
+  if (fromEnv) return fromEnv;
   const file = path.join(localDataDir(), "session-secret");
   try {
     return (await readFile(file, "utf8")).trim();
@@ -483,11 +483,11 @@ const authApi: AuthApi = {
   async setupState() {
     const owner = (await readData()).owner;
     if (owner) return { kind: "ready" };
-    const tokenRequired = isProduction() || Boolean(process.env.ADMIN_SETUP_TOKEN?.trim());
+    const tokenRequired = isProduction() || Boolean(adminSetupToken());
     return {
       kind: "needs-owner",
       tokenRequired,
-      setupAllowed: !tokenRequired || Boolean(process.env.ADMIN_SETUP_TOKEN?.trim()),
+      setupAllowed: !tokenRequired || Boolean(adminSetupToken()),
     };
   },
 

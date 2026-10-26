@@ -107,6 +107,16 @@ export function catalogCacheSeconds(): number {
 }
 
 /**
+ * A fixed signing secret (32+ characters), or null to use the built-in one:
+ * derived from the Supabase secret key, or kept in the local store's folder.
+ * Signs checkout form tokens and local dashboard sessions.
+ */
+export function sessionSecretSetting(): string | null {
+  const value = read("SESSION_SECRET");
+  return value && value.length >= 32 ? value : null;
+}
+
+/**
  * Token that unlocks the first-run owner sign-up of a local store. Required
  * in production. In development the setup screen is open unless a token is
  * set — set one if others share your network, since `next dev` listens on it.
