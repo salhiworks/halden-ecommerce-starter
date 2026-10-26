@@ -1,0 +1,240 @@
+@import "tailwindcss";
+
+/*
+ * ============================================================================
+ *  DESIGN TOKENS
+ * ============================================================================
+ *
+ *  Neutrals are fixed; the accent, the display face and the corner radius
+ *  come from the owner's theme (see src/lib/theme.ts) as CSS variables set on
+ *  <html>. Tailwind utilities like `bg-accent` and `rounded-card` read them.
+ */
+
+:root {
+  --paper: #ffffff;
+  --canvas: #f4f4f1;
+  --tile: #eeeeea;
+  --ink: #161614;
+  --ink-2: #4b4b46;
+  --ink-3: #75756e;
+  --line: #e1e1db;
+  --line-strong: #c9c9c2;
+
+  --success: #1d6b45;
+  --success-soft: #e6f2eb;
+  --warning: #9a5b00;
+  --warning-soft: #fbf0dc;
+  --danger: #b4322a;
+  --danger-soft: #fbe9e7;
+  --info: #24539c;
+  --info-soft: #e8eef8;
+
+  /* Overridden per store by themeStyle(). */
+  --accent: #0f4c5c;
+  --accent-ink: #ffffff;
+  --accent-text: #0f4c5c;
+  --font-display: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --display-transform: uppercase;
+  --display-stretch: 125%;
+  --display-tracking: 0.005em;
+  --display-weight: 800;
+  --radius-card: 14px;
+  --radius-control: 10px;
+  --radius-pill: 999px;
+
+  --header-height: 64px;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-canvas: var(--canvas);
+  --color-tile: var(--tile);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-text: var(--accent-text);
+  --color-accent-soft: color-mix(in srgb, var(--accent) 10%, white);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+
+  --font-sans: var(--font-archivo), var(--font-plex-arabic), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display);
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --radius-card: var(--radius-card);
+  --radius-control: var(--radius-control);
+  --radius-pill: var(--radius-pill);
+}
+
+/* ------------------------------------------------------------------- base */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01" 0;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--accent) 22%, white);
+    color: var(--ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  [dir="rtl"] .flip-rtl {
+    transform: scaleX(-1);
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+  }
+
+  dialog::backdrop {
+    background: rgb(22 22 20 / 0.45);
+  }
+}
+
+/* ------------------------------------------------------------ type system */
+
+@layer components {
+  /*
+   * The display voice: shop signage. In the default "signage" pairing it is
+   * Archivo at full width and heavy weight, set in capitals; other pairings
+   * swap the face and drop the capitals.
+   */
+  .display {
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-variation-settings: "wdth" 125;
+    text-transform: var(--display-transform);
+    letter-spacing: var(--display-tracking);
+    font-weight: var(--display-weight);
+    line-height: 0.98;
+  }
+
+  /* Prices read like price signage: wide, tabular, never wrapping. */
+  .price {
+    font-family: var(--font-archivo), var(--font-plex-arabic), sans-serif;
+    font-stretch: 112%;
+    font-variation-settings: "wdth" 112;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--ink-3);
+  }
+
+  [lang="ar"] .eyebrow {
+    letter-spacing: 0;
+  }
+
+  /* Long-form text an owner writes: descriptions and policy pages. */
+  .prose-store {
+    line-height: 1.65;
+    color: var(--ink-2);
+  }
+  .prose-store p + p,
+  .prose-store ul + p,
+  .prose-store p + ul {
+    margin-top: 0.9em;
+  }
+  .prose-store ul {
+    list-style: disc;
+    padding-inline-start: 1.2em;
+  }
+  .prose-store li + li {
+    margin-top: 0.3em;
+  }
+  .prose-store h3 {
+    margin-top: 1.4em;
+    margin-bottom: 0.4em;
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* A receipt edge: the zig-zag of torn thermal paper. */
+  .receipt-edge {
+    --tooth: 9px;
+    mask:
+      conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / calc(2 * var(--tooth)) 100%;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Drawers slide in from the side they are anchored to (see Drawer.tsx). */
+dialog.drawer-end[open] {
+  animation: drawer-from-end 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+dialog.drawer-start[open] {
+  animation: drawer-from-start 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+[dir="rtl"] dialog.drawer-end[open] {
+  animation-name: drawer-from-start;
+}
+[dir="rtl"] dialog.drawer-start[open] {
+  animation-name: drawer-from-end;
+}
+@keyframes drawer-from-end {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes drawer-from-start {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+/* The editorial and friendly pairings have no width axis to set. (Not tied
+   to :root, so the dashboard's theme preview can show them too.) */
+[data-pairing="editorial"] .display,
+[data-pairing="friendly"] .display {
+  font-variation-settings: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

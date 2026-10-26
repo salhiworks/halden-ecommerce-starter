@@ -1,0 +1,51 @@
+{
+  "name": "halden-ecommerce-starter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Halden: a customizable e-commerce starter with a storefront, a real admin dashboard, and WhatsApp and pay-on-delivery checkout. Next.js + Supabase.",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "start": "next start",
+    "setup": "node scripts/setup.mjs",
+    "db:migrate": "node scripts/db-migrate.mjs",
+    "db:seed": "node --conditions=react-server --import tsx scripts/seed.mts",
+    "db:check": "node scripts/check-supabase.mjs",
+    "admin:create": "node scripts/create-admin.mjs",
+    "demo:reset": "node scripts/reset-local-store.mjs",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "npm run build && playwright test",
+    "privacy:check": "node scripts/privacy-check.mjs",
+    "verify": "npm run typecheck && npm run lint && npm run test && npm run privacy:check && npm run build"
+  },
+  "dependencies": {
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.117.3",
+    "lucide-react": "1.56.0",
+    "next": "16.4.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "server-only": "0.0.1",
+    "zod": "4.6.6"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.9",
+    "@playwright/test": "1.64.0",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.3",
+    "tailwindcss": "^4",
+    "tsx": "4.23.15",
+    "typescript": "^5",
+    "vitest": "^4.1.12"
+  }
+}

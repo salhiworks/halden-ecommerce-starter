@@ -1,0 +1,11 @@
+# Supabase CLI settings for this store.
+#
+# Only what the store needs is declared here. `npm run setup` pushes it to
+# your project with `supabase config push`, which changes exactly the
+# settings below and leaves everything else in your project as it is.
+
+project_id = "halden-ecommerce-starter"
+
+[auth]
+# The shop has no customer accounts: only the admins you create can sign in.
+enable_signup = false
