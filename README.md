@@ -8,6 +8,23 @@ It opens as **Halden**, a fictional demo store with 30 products, so you can try 
 
 ---
 
+## Set up with Claude Desktop
+
+No coding needed: Claude does the setup with you and only stops when it needs your accounts, your password or your approval. You need free [Supabase](https://supabase.com) and [GitHub](https://github.com) accounts, a Hostinger plan with Node.js web apps (Business or Cloud), and the [Claude Desktop](https://claude.ai/download) app.
+
+1. **Make your own copy.** At the top of this page, click **Use this template → Create a new repository**. Public is simplest — your keys and passwords never go into it — and private works too.
+2. **Bring it to your computer.** In Claude Desktop, open the **Code** tab, start a **Local** session and open your **Documents** folder. Ask Claude, with your new repository's address:
+
+   > Clone https://github.com/your-name/your-store into this folder. If GitHub needs me to sign in, give me the command to run in the Terminal.
+
+   A public repository downloads straight away. For a private one, you run that command in the session's **Terminal** and sign in to GitHub there: on Windows in the browser window that opens; on a Mac, GitHub asks for your username and a password — paste a [personal access token](https://github.com/settings/personal-access-tokens/new) (only this repository, **Contents: Read and write**) instead of your GitHub password.
+3. **Open the new folder** in a new **Local** session and ask Claude: *Set up Halden for me* — or type `/halden-setup`.
+4. **Follow its instructions.** Claude checks your computer, connects a new Supabase project, shows you the store and its dashboard on your computer, then guides you through putting it online with Hostinger and checks the live store. When it asks you to type something yourself, use the **Terminal** button at the top of the Claude session. Your keys and password never go into the chat.
+
+Prefer to do it yourself? The three steps below are the same setup, by hand.
+
+---
+
 ## Get your store online in three steps
 
 You need [Node.js](https://nodejs.org) 20.9 or newer and a free [Supabase](https://supabase.com) account — plus a Hostinger plan with Node.js hosting for step 3.
@@ -62,19 +79,20 @@ Your store is live. Everything else — store name, logo, currency, WhatsApp num
 
 ## Contents
 
-1. [Get your store online in three steps](#get-your-store-online-in-three-steps)
-2. [What you get](#what-you-get)
-3. [Your admin account](#your-admin-account)
-4. [How ordering works](#how-ordering-works)
-5. [More about Supabase](#more-about-supabase)
-6. [More about Hostinger](#more-about-hostinger)
-7. [Customize it](#customize-it)
-8. [How the code is organized](#how-the-code-is-organized)
-9. [Commands](#commands)
-10. [Tests](#tests)
-11. [Security and privacy](#security-and-privacy)
-12. [Troubleshooting](#troubleshooting)
-13. [Advanced configuration](docs/advanced-configuration.md)
+1. [Set up with Claude Desktop](#set-up-with-claude-desktop)
+2. [Get your store online in three steps](#get-your-store-online-in-three-steps)
+3. [What you get](#what-you-get)
+4. [Your admin account](#your-admin-account)
+5. [How ordering works](#how-ordering-works)
+6. [More about Supabase](#more-about-supabase)
+7. [More about Hostinger](#more-about-hostinger)
+8. [Customize it](#customize-it)
+9. [How the code is organized](#how-the-code-is-organized)
+10. [Commands](#commands)
+11. [Tests](#tests)
+12. [Security and privacy](#security-and-privacy)
+13. [Troubleshooting](#troubleshooting)
+14. [Advanced configuration](docs/advanced-configuration.md)
 
 ---
 
