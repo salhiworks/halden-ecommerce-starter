@@ -322,4 +322,4 @@ The end-to-end tests never contact WhatsApp or any other service.
 
 ## License
 
-The code is MIT-licensed — see [LICENSE](LICENSE). Not included in that license: the demo photographs in `public/demo` (stock photos under their own licenses, listed in [public/demo/CREDITS.md](public/demo/CREDITS.md)) and the brand icons, which are trademarks of their owners.
+The code is MIT-licensed — see [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md). Not included in that license: the demo photographs in `public/demo` (stock photos under their own licenses, listed in [public/demo/CREDITS.md](public/demo/CREDITS.md)) and the brand icons, which are trademarks of their owners.
