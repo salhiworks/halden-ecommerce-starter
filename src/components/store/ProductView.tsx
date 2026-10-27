@@ -3,7 +3,7 @@
 import { Check, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { WhatsAppIcon } from "@/components/icons/brands";
 import { buttonClass } from "@/components/ui/button";
 import { addToCart, setCartDrawer } from "@/lib/cart/store";
@@ -287,9 +287,29 @@ export function ProductView({ product, productUrl, category, variantId = null, c
 
 /* ---------------------------------------------------------------- gallery */
 
+/**
+ * The photo frame takes the shape of the product's first photo (extreme ones
+ * within 1:2 to 2:1), and is never taller than
+ * `--gallery-max`: on phones and tablets about a screen's width or 60% of its
+ * height, on desktop what fits below the header. Photos are shown whole
+ * (`object-contain`), so a photo of another shape sits on the tile colour
+ * instead of being cropped.
+ */
+const FRAME =
+  "relative mx-auto aspect-[var(--ratio)] w-[min(100%,calc(var(--gallery-max)*var(--ratio)))] overflow-hidden rounded-card bg-tile";
+
+function frameRatio(image: ProductImage | undefined): number {
+  if (!image?.width || !image.height) return 4 / 5;
+  return Math.min(2, Math.max(1 / 2, image.width / image.height));
+}
+
 function Gallery({ product, activeImageId }: { product: Product; activeImageId: string | null }) {
   const { t } = useStore();
   const images = product.images;
+  const frame = {
+    className: "[--gallery-max:min(100vw,60svh)] lg:[--gallery-max:max(26rem,calc(100svh-12rem))]",
+    style: { "--ratio": frameRatio(images[0]) } as CSSProperties,
+  };
   const [index, setIndex] = useState(() => Math.max(0, images.findIndex((image) => image.id === activeImageId)));
   const rail = useRef<HTMLDivElement>(null);
 
@@ -310,12 +330,28 @@ function Gallery({ product, activeImageId }: { product: Product; activeImageId: 
     }
   }, [activeImageId, images]);
 
+  // With many photos the thumbnails scroll; keep the current one in view.
+  const thumbs = useRef<HTMLUListElement>(null);
+  useEffect(() => {
+    const list = thumbs.current;
+    const item = list?.children[index];
+    if (!list || !item) return;
+    const outer = list.getBoundingClientRect();
+    const inner = item.getBoundingClientRect();
+    if (inner.left < outer.left) list.scrollBy({ left: inner.left - outer.left, behavior: "smooth" });
+    else if (inner.right > outer.right) list.scrollBy({ left: inner.right - outer.right, behavior: "smooth" });
+  }, [index]);
+
   if (images.length === 0) {
-    return <div className="aspect-[4/5] rounded-card bg-tile" />;
+    return (
+      <div {...frame}>
+        <div className={FRAME} />
+      </div>
+    );
   }
 
   return (
-    <div>
+    <div {...frame}>
       {/* Phones: swipe between photos. */}
       <div className="relative -mx-4 sm:mx-0 lg:hidden">
         <div
@@ -323,20 +359,23 @@ function Gallery({ product, activeImageId }: { product: Product; activeImageId: 
           className="scrollbar-none relative flex snap-x snap-mandatory overflow-x-auto"
           onScroll={(event) => {
             const element = event.currentTarget;
-            const next = Math.round(element.scrollLeft / element.clientWidth);
+            // In right-to-left languages scrollLeft counts down from 0.
+            const next = Math.round(Math.abs(element.scrollLeft) / element.clientWidth);
             if (next !== index) setIndex(next);
           }}
         >
           {images.map((image, position) => (
-            <div key={image.id} className="relative aspect-[4/5] w-full shrink-0 snap-center bg-tile sm:rounded-card sm:overflow-hidden">
-              <Image
-                src={image.url}
-                alt={imageAlt(product, image, position)}
-                fill
-                priority={position === 0}
-                sizes="100vw"
-                className="object-cover"
-              />
+            <div key={image.id} className="w-full shrink-0 snap-center px-4 sm:px-0">
+              <div className={FRAME}>
+                <Image
+                  src={image.url}
+                  alt={imageAlt(product, image, position)}
+                  fill
+                  priority={position === 0}
+                  sizes="100vw"
+                  className="object-contain"
+                />
+              </div>
             </div>
           ))}
         </div>
@@ -356,7 +395,7 @@ function Gallery({ product, activeImageId }: { product: Product; activeImageId: 
       <div className="hidden lg:block">
         <ZoomImage image={images[index]} alt={imageAlt(product, images[index], index)} />
         {images.length > 1 && (
-          <div className="mt-4 flex items-center gap-3">
+          <div className="mt-4 flex items-center justify-center gap-3">
             <button
               type="button"
               onClick={() => setIndex((current) => (current - 1 + images.length) % images.length)}
@@ -365,7 +404,7 @@ function Gallery({ product, activeImageId }: { product: Product; activeImageId: 
             >
               <ChevronLeft size={18} className="flip-rtl" />
             </button>
-            <ul className="flex gap-3">
+            <ul ref={thumbs} className="scrollbar-none flex min-w-0 gap-3 overflow-x-auto p-1">
               {images.map((image, position) => (
                 <li key={image.id}>
                   <button
@@ -402,7 +441,7 @@ function ZoomImage({ image, alt }: { image: ProductImage; alt: string }) {
   const [origin, setOrigin] = useState<string | null>(null);
   return (
     <div
-      className="relative aspect-[4/5] cursor-zoom-in overflow-hidden rounded-card bg-tile"
+      className={`${FRAME} cursor-zoom-in`}
       onPointerMove={(event) => {
         if (event.pointerType !== "mouse") return;
         const box = event.currentTarget.getBoundingClientRect();
@@ -419,7 +458,7 @@ function ZoomImage({ image, alt }: { image: ProductImage; alt: string }) {
         fill
         priority
         sizes="(min-width: 1440px) 760px, 55vw"
-        className="object-cover transition-transform duration-200 ease-out"
+        className="object-contain transition-transform duration-200 ease-out"
         style={{ transform: origin ? "scale(2)" : "scale(1)", transformOrigin: origin ?? "50% 50%" }}
       />
     </div>
