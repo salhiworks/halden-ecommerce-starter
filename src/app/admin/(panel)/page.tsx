@@ -8,7 +8,7 @@ import { EmptyState, Notice, PageHeader, Panel } from "@/components/admin/ui";
 import { buttonClass } from "@/components/ui/button";
 import { formatMoney, type MoneyFormat } from "@/lib/domain/money";
 import { orderMetrics } from "@/lib/domain/orders";
-import { lowStockCount, totalStock } from "@/lib/domain/product";
+import { stockIssue } from "@/lib/domain/product";
 import { DEFAULT_SETTINGS, isWhatsAppConfigured } from "@/lib/domain/settings";
 import { requireAdmin } from "@/server/admin";
 
@@ -33,10 +33,8 @@ export default async function OverviewPage() {
 
   const active = catalog.products.filter((product) => product.status === "active");
   const drafts = catalog.products.filter((product) => product.status === "draft").length;
-  const soldOut = active.filter((product) => product.trackInventory && totalStock(product) === 0);
-  const low = active.filter(
-    (product) => product.trackInventory && product.variants.some((variant) => lowStockCount(product, variant) !== null),
-  );
+  const soldOut = active.filter((product) => stockIssue(product) === "sold-out");
+  const low = active.filter((product) => stockIssue(product) === "low");
   const demoProducts = catalog.products.filter((product) => product.isDemo).length;
   const ownProducts = catalog.products.length - demoProducts;
 

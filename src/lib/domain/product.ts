@@ -110,6 +110,19 @@ export function totalStock(product: Product): number | null {
   );
 }
 
+/**
+ * The dashboard's one stock alert per active product: "sold-out" when nothing can be bought,
+ * "low" when a variant is running low or has sold out while others remain.
+ */
+export function stockIssue(product: Product): "sold-out" | "low" | null {
+  if (isSoldOut(product)) return "sold-out";
+  const low = product.variants.some(
+    (variant) =>
+      variant.available && (lowStockCount(product, variant) !== null || (product.trackInventory && variant.stock <= 0)),
+  );
+  return low ? "low" : null;
+}
+
 /* --------------------------------------------------------------- variants */
 
 /** Exact lookup by one value per option. */

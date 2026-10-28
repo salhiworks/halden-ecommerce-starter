@@ -6,7 +6,7 @@ import { EmptyState, PageHeader, Panel, Pill } from "@/components/admin/ui";
 import { buttonClass } from "@/components/ui/button";
 import { searchProducts } from "@/lib/domain/catalog-query";
 import { formatMoney } from "@/lib/domain/money";
-import { lowStockCount, priceSummary, primaryImage, totalStock } from "@/lib/domain/product";
+import { priceSummary, primaryImage, stockIssue, totalStock } from "@/lib/domain/product";
 import type { Product } from "@/lib/domain/types";
 import { requireAdmin } from "@/server/admin";
 
@@ -20,11 +20,6 @@ const VIEWS = [
   { key: "stock", label: "Low or out of stock" },
 ] as const;
 
-function stockIssue(product: Product): boolean {
-  if (!product.trackInventory) return product.variants.every((variant) => !variant.available);
-  return totalStock(product) === 0 || product.variants.some((variant) => lowStockCount(product, variant) !== null || (variant.available && variant.stock === 0));
-}
-
 type Props = { searchParams: Promise<{ view?: string; q?: string }> };
 
 export default async function ProductsPage({ searchParams }: Props) {
@@ -37,7 +32,7 @@ export default async function ProductsPage({ searchParams }: Props) {
   const categoryName = new Map(catalog.categories.map((category) => [category.id, category.name]));
 
   const inView = (product: Product) =>
-    view.key === "all" ? true : view.key === "stock" ? product.status === "active" && stockIssue(product) : product.status === view.key;
+    view.key === "all" ? true : view.key === "stock" ? product.status === "active" && stockIssue(product) !== null : product.status === view.key;
   const base = catalog.products.filter(inView);
   const products = query
     ? searchProducts(base, query, catalog.categories)
@@ -49,7 +44,7 @@ export default async function ProductsPage({ searchParams }: Props) {
         candidate.key === "all"
           ? true
           : candidate.key === "stock"
-            ? product.status === "active" && stockIssue(product)
+            ? product.status === "active" && stockIssue(product) !== null
             : product.status === candidate.key,
       ).length,
     ]),
@@ -147,7 +142,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                       ) : stock === 0 ? (
                         <span className="font-medium text-danger">Sold out</span>
                       ) : (
-                        <span className={stockIssue(product) ? "font-medium text-warning" : ""}>{stock} in stock</span>
+                        <span className={stockIssue(product) !== null ? "font-medium text-warning" : ""}>{stock} in stock</span>
                       )}
                     </span>
                     <span className="hidden w-24 md:block">

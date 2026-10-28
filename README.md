@@ -10,7 +10,7 @@ It opens as **Halden**, a fictional demo store with 30 products, so you can try 
 
 ## Set up with Claude Desktop
 
-No coding needed: Claude does the setup with you and only stops when it needs your accounts, your password or your approval. You need free [Supabase](https://supabase.com) and [GitHub](https://github.com) accounts, a Hostinger plan with Node.js web apps (Business or Cloud), and the [Claude Desktop](https://claude.ai/download) app.
+No coding needed: Claude does the setup with you and only stops when it needs your accounts, your password or your approval. You need free [Supabase](https://supabase.com) and [GitHub](https://github.com) accounts, a Hostinger plan with Node.js web apps (such as Business, Unlimited or Cloud), and the [Claude Desktop](https://claude.ai/download) app.
 
 1. **Make your own copy.** At the top of this page, click **Use this template → Create a new repository**. Public is simplest — your keys and passwords never go into it — and private works too.
 2. **Bring it to your computer.** In Claude Desktop, open the **Code** tab, start a **Local** session and open your **Documents** folder. Ask Claude, with your new repository's address:
@@ -61,7 +61,7 @@ Open <http://localhost:3000> — that's the Halden demo store. Nothing to config
 
 1. Put the project on your own GitHub repository.
 2. In hPanel: **Websites** → **Add Website** → **Web App**.
-3. Choose a domain — the free **Temporary Domain** is fine; you can connect your own later.
+3. Choose a domain — your own, or the free **Temporary Domain** (you can connect your own later).
 4. Choose **Import Git Repository**, connect GitHub if asked, and select your repository on the **main** branch.
 5. Hostinger detects **Next.js** and fills in the build settings — keep them. Node.js 22 is recommended; another version Hostinger offers (20.9 or newer) works too.
 6. Under **Environment variables**, add these three, using exactly these names. Get the values from your Supabase project dashboard:
@@ -205,7 +205,7 @@ Received ──▶ Confirmed ──▶ Fulfilled ──▶ Completed
 
 ## More about Hostinger
 
-- Hostinger's Node.js web hosting (Business and Cloud plans) runs the store. Choose **Node.js 20 or 22**; the start command is `npm start` if you're asked for one. Menu names in hPanel may differ slightly between plans.
+- Any Hostinger plan with Node.js web apps (such as Business, Unlimited or Cloud) runs the store. Choose **Node.js 20 or 22**; the start command is `npm start` if you're asked for one. Menu names in hPanel may differ slightly between plans.
 - Connect your domain and turn on SSL in hPanel.
 - If you connected Supabase through Hostinger's database wizard, it has already added `SUPABASE_URL` and `SUPABASE_ANON_KEY` (the older name of the publishable key, which also works) — add `SUPABASE_SECRET_KEY` yourself.
 - The build uses webpack (`next build --webpack`), which works on build machines where Turbopack's native binary can't load.

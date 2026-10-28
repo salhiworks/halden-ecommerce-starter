@@ -11,6 +11,7 @@ import {
   lowStockCount,
   optionValueState,
   priceSummary,
+  stockIssue,
   variantLabel,
 } from "./product";
 import { DEFAULT_SETTINGS, isSafeHref, parseSettings, settingsSchema } from "./settings";
@@ -147,6 +148,22 @@ describe("products and variants", () => {
     expect(lowStockCount(tracked, { stock: 2, available: true })).toBe(2);
     expect(lowStockCount(tracked, { stock: 10, available: true })).toBeNull();
     expect(lowStockCount({ trackInventory: false }, { stock: 1, available: true })).toBeNull();
+  });
+
+  it("gives each product one stock alert, matching the dashboard and the stock filter", () => {
+    // The Overview once missed a tracked product with one variant sold out and another in stock.
+    const tracked = (...stocks: number[]) =>
+      product({ trackInventory: true, variants: stocks.map((stock) => variant({ stock })) });
+    expect(stockIssue(tracked(8, 0))).toBe("low");
+    expect(stockIssue(tracked(8, 2))).toBe("low");
+    expect(stockIssue(tracked(0, 0))).toBe("sold-out");
+    expect(stockIssue(tracked(8, 9))).toBeNull();
+    // An unavailable variant is switched off, not sold out.
+    expect(stockIssue(product({ trackInventory: true, variants: [variant({ stock: 8 }), variant({ stock: 0, available: false })] }))).toBeNull();
+    expect(stockIssue(product({ trackInventory: true, variants: [variant({ stock: 5, available: false })] }))).toBe("sold-out");
+    // Untracked stock only runs out when every variant is switched off.
+    expect(stockIssue(product({ variants: [variant({ available: true }), variant({ available: false })] }))).toBeNull();
+    expect(stockIssue(product({ variants: [variant({ available: false })] }))).toBe("sold-out");
   });
 });
 

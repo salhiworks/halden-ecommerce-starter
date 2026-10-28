@@ -69,7 +69,7 @@ off public sign-ups — never redo any of that by hand (no SQL editor, no hand-w
 2. **Install approval** — one yes for that exact project.
 3. **Run the setup** in the Terminal and answer its questions.
 4. **Look at the store** on this computer (optional; they can go straight on).
-5. **Hostinger** — one message: create the web app, copy three settings from the local file, deploy, paste the address.
+5. **Hostinger** — one message: create the web app, copy three settings from the Supabase Dashboard, deploy, paste the address.
 6. **Sign in on the live site** and set the shop address.
 
 ---
@@ -104,8 +104,8 @@ Never re-run the setup, the database step or the demo products just to be safe.
    (exit code 0) and, later, to find their project.
 
 First status line, once: what you checked, and that the journey needs a free **Supabase** account,
-their own **GitHub** copy of Halden, and a **Hostinger** plan that runs Node.js web apps (Business or
-Cloud) — hosting is only needed at the end. Then go straight to B (or A2).
+their own **GitHub** copy of Halden, and a **Hostinger** plan that runs Node.js web apps (such as Business,
+Unlimited or Cloud) — hosting is only needed at the end. Then go straight to B (or A2).
 
 ## A2. Their own copy — only when A3 sends you here
 
@@ -243,7 +243,8 @@ shown, the keys never). Hostinger's and Supabase's wording can differ slightly: 
 not the exact labels.
 
 1. hPanel → **Websites** → **Add Website** (or **Create**) → **Web App**.
-2. **Domain:** choose the free **Temporary Domain** (their own can be connected later).
+2. **Domain:** their own domain, or the free **Temporary Domain** (their own can be connected
+   later).
 3. **Import Git Repository:** connect GitHub if asked, give Hostinger access to **only** their Halden
    copy (*<owner>/<repo>* from A3), and select it — never `salhiworks/halden-ecommerce-starter`.
    Branch **main**.
