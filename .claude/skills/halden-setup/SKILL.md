@@ -40,7 +40,7 @@ off public sign-ups — never redo any of that by hand (no SQL editor, no hand-w
   run `env`/`printenv`, never run `supabase projects api-keys` yourself.
 - About `.env.local` you may only: check it exists, count which of the three names are filled
   (`grep -cE '^(SUPABASE_URL|SUPABASE_PUBLISHABLE_KEY|SUPABASE_SECRET_KEY)=.+' .env.local`), read
-  the `SUPABASE_URL` line (a public address), pipe a value to the clipboard (E's fallback), and open the file in the user's own text editor (E) — without reading it.
+  the `SUPABASE_URL` line (a public address), pipe a value to the clipboard (E's fallback), and open the file in the user's own text editor as E's fallback — without reading it.
 - Never ask for a password or key in chat. If one is pasted anyway, don't repeat it; say it's best
   not to share it, and if it was the secret key, suggest creating a new one later in Supabase →
   Project Settings → API Keys and running the setup again.
@@ -237,9 +237,10 @@ The setup asks questions and a hidden password, which only the user's Terminal c
 Never use FTP, a VPS, another host or a Hostinger connector, and never change or overwrite an
 existing website: Halden is always added as a **new** website.
 
-**User moment 5 — one message, the whole deployment.** Open their private keys file for them in the
-same turn (below), then send this once, with their real values filled in. Hostinger's wording can
-differ slightly: follow the meaning, not the exact labels.
+**User moment 5 — one message, the whole deployment.** Send it once, with their real values filled
+in (the Supabase links use the confirmed ref; the Project URL `https://<ref>.supabase.co` may be
+shown, the keys never). Hostinger's and Supabase's wording can differ slightly: follow the meaning,
+not the exact labels.
 
 1. hPanel → **Websites** → **Add Website** (or **Create**) → **Web App**.
 2. **Domain:** choose the free **Temporary Domain** (their own can be connected later).
@@ -249,25 +250,33 @@ differ slightly: follow the meaning, not the exact labels.
 4. **Build settings:** Hostinger detects **Next.js** — keep what it fills in (build `npm run build`,
    start `npm start` if asked). Node.js 22 is recommended; any version Hostinger offers that is 20.9
    or newer works.
-5. **Environment variables:** add exactly these three names — `SUPABASE_URL`,
-   `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`. Their values are already in the file just
-   opened on this computer (`.env.local`): copy the part after each `=` into the matching field.
-   The secret key is private — never share it. Leave out any other names Hostinger suggests.
-6. Click **Deploy**. When it finishes, open the site, and paste its address here.
-7. After copying the values, close the file **without saving**.
-
-Opening the file (you run this; you never read it): macOS `open -e .env.local`, Windows
-`notepad .env.local` — from this folder. Never `cat`/Read it, never show its contents. If it doesn't
-open, tell them the file is `.env.local` in this folder (Finder and Explorer hide dot-files, so use
-a text editor's **Open**), or use the fallback below.
+5. **Environment variables:** in a second browser tab, open their Supabase project
+   (`https://supabase.com/dashboard/project/<ref>`) — check the name shown is *<project name>* —
+   and add exactly these three names in Hostinger:
+   - `SUPABASE_URL` — the **Project URL**, from **Connect** or **Integrations → Data API**
+     (`https://<ref>.supabase.co`).
+   - `SUPABASE_PUBLISHABLE_KEY` — **Project Settings → API Keys** → the **Publishable key**
+     (starts with `sb_publishable_`).
+   - `SUPABASE_SECRET_KEY` — the same page → **Secret keys** → the `default` secret key
+     (starts with `sb_secret_`; click the eye or **Reveal**, then copy). It is private: never paste
+     it into this chat, and don't show it if they are recording their screen.
+   Use these current keys, not the **Legacy** anon/service_role ones. Leave out any other names
+   Hostinger suggests.
+6. Click **Deploy**. When it finishes, open the site and paste its address here.
 
 A failed build: ask them to copy the last red lines of the build log here (they hold no keys).
+
+**Optional troubleshooting fallback — `.env.local`.** `npm run setup` saved the same three values in
+`.env.local` in this folder. Only if a value is missing, wrong or a key can't be revealed, or the
+site says it can't reach its database, offer to open it for them in their own text editor (you run
+it; you never read it): macOS `open -e .env.local`, Windows `notepad .env.local`. They copy the part
+after each `=` and close it without saving. Never `cat`/Read it or show its contents.
 
 **Import .env** — do not suggest it. Hostinger's import was not verified against the generated
 `.env.local` (which a user may also have edited), and it would risk bringing in names beyond the
 three. Typing the three variables is the supported route.
 
-**Clipboard fallback** — only if they can't copy the values from the file, or ask for help. One key
+**Clipboard fallback** (from `.env.local`) — only if they can't copy the values themselves and ask for help. One key
 at a time; the values never appear in chat, a command line, command output or a file:
 - Copy with exactly this command, changing only the two names (macOS):
   `sed -n 's/^SUPABASE_PUBLISHABLE_KEY=//p' .env.local | head -n 1 | tr -d '\r\n' | pbcopy && pbpaste | grep -cE '^(sb_publishable_|eyJ)'`
@@ -275,7 +284,7 @@ at a time; the values never appear in chat, a command line, command output or a 
   Windows: `| clip` instead of `| pbcopy`, and
   `powershell -NoProfile -Command Get-Clipboard | grep -cE '…'` for the check.
 - Never run `pbpaste` or `Get-Clipboard` except piped into that count. A check that prints `0` →
-  don't debug it; use the file.
+  don't debug it; open the file instead.
 - Copy a key in the same turn as the message asking them to paste it; change the clipboard again
   only after they reply it's pasted. When done, clear it (`printf '' | pbcopy`; Windows
   `printf '' | clip`; Windows clipboard history, Win+V, may keep copies they can delete).
@@ -334,7 +343,7 @@ Fix only what failed, then run `npm run db:check` again:
 | `git clone` asks for a password and GitHub refuses it (macOS) | GitHub needs a token instead of the account password — see A2 step 4. |
 | `npm` or `node` "not found" | Node.js isn't installed, or Claude Desktop wasn't restarted after installing it. |
 | `Missing script: "setup"` / cannot find `scripts/setup.mjs` | The terminal isn't in the store's folder: `cd "<full path>"` first. |
-| Live site says it can't reach / isn't connected to its database | A variable is missing, misspelled or has a wrong value in Hostinger: check the three names against `.env.local` (opened as in E), then **Redeploy**. |
+| Live site says it can't reach / isn't connected to its database | A variable is missing, misspelled or has a wrong value in Hostinger: check the three names and values (the Supabase page in E, or `.env.local` as its fallback), then **Redeploy**. |
 | Hostinger build fails | Usually the Node.js version (try 22) or a changed build command — use the detected Next.js settings as in E and redeploy. |
 | Live homepage shows a demo band | `PUBLIC_DEMO_MODE` was added on Hostinger: remove it and redeploy. |
 

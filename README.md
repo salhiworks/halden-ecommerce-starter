@@ -64,15 +64,15 @@ Open <http://localhost:3000> — that's the Halden demo store. Nothing to config
 3. Choose a domain — the free **Temporary Domain** is fine; you can connect your own later.
 4. Choose **Import Git Repository**, connect GitHub if asked, and select your repository on the **main** branch.
 5. Hostinger detects **Next.js** and fills in the build settings — keep them. Node.js 22 is recommended; another version Hostinger offers (20.9 or newer) works too.
-6. Under **Environment variables**, add these three. Their values are already in your `.env.local` file in the project folder, which `npm run setup` created. Open it in a text editor (Finder and Explorer hide files whose name starts with a dot, so use the editor's **Open** command), copy each value — the part after `=` — and close the file without saving:
+6. Under **Environment variables**, add these three, using exactly these names. Get the values from your Supabase project dashboard:
 
-   | Name | Value |
+   | Name | Where to copy it |
    | --- | --- |
-   | `SUPABASE_URL` | from `.env.local` |
-   | `SUPABASE_PUBLISHABLE_KEY` | from `.env.local` |
-   | `SUPABASE_SECRET_KEY` | from `.env.local` — keep it secret |
+   | `SUPABASE_URL` | **Project URL**, from **Connect** or **Integrations → Data API** |
+   | `SUPABASE_PUBLISHABLE_KEY` | **Project Settings → API Keys** → **Publishable key** (`sb_publishable_…`) |
+   | `SUPABASE_SECRET_KEY` | **Project Settings → API Keys** → **Secret keys** (`sb_secret_…`) — keep it secret |
 
-   That's all the store needs. Hostinger may list other names it finds in the code; you don't need them ([what they are](docs/advanced-configuration.md)). Never paste these values into GitHub, a chat or an email.
+   Use these current keys, not the **Legacy** anon/service_role ones. That's all the store needs. Hostinger may list other names it finds in the code; you don't need them ([what they are](docs/advanced-configuration.md)). Never paste the secret key into GitHub, a chat or an email, and don't show it if you're recording your screen. If something goes wrong, the same three values are in the `.env.local` file that `npm run setup` created in your project folder (open it in a text editor — Finder and Explorer hide files whose name starts with a dot).
 
 7. Click **Deploy**. When it finishes, open `https://your-domain/admin`, sign in, and set **Settings → Store → Shop address** to your site's address.
 
