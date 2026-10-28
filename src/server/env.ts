@@ -92,8 +92,9 @@ export function isProduction(): boolean {
  * Public demo mode — for a store anyone on the internet can try, like the
  * hosted Halden demo. When on:
  *   • visitors can open a read-only preview of the dashboard (no account);
- *   • orders placed in the shop are kept in memory for an hour so the
- *     shopper sees the whole flow, and are never saved or shown to anyone.
+ *   • orders placed in the shop are kept, encrypted, in the shopper's own
+ *     browser for an hour so they see the whole flow, and are never saved
+ *     or shown to anyone.
  * Never turn it on for a real store: its orders would not be saved.
  */
 export function publicDemoMode(): boolean {

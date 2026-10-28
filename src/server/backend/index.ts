@@ -33,7 +33,7 @@ export function getBackend(): Backend {
       registerSeed(demoLocalData);
       backend = createLocalBackend();
     }
-    // Public demo: shop orders stay in memory and never reach the database.
+    // Public demo: shop orders stay in the shopper's browser and never reach the database.
     holder.backend = demo ? { ...backend, public: withDemoOrders(backend.public) } : backend;
     holder.kind = key;
   }

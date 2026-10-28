@@ -29,7 +29,7 @@ For a store anyone on the internet can try — like the hosted Halden demo — s
 
 - A band above the shop says it is a demo, with a link to explore the dashboard.
 - Visitors open the dashboard as a **guest**: every page and control is there, but nothing is saved. They see sample orders made up for the preview, never real ones, and no account details.
-- Orders placed in the shop reach the confirmation page but are kept in the server's memory for an hour and never saved. Nothing is sent to anyone.
+- Orders placed in the shop reach the confirmation page but are kept, encrypted, in the shopper's own browser for an hour and never saved. Nothing is sent to anyone.
 - The owner still signs in with their admin account. `npm run db:seed -- --settings` puts the demo products and settings back as they were.
 
 Never turn it on for a real store: its orders would not be saved.

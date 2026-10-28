@@ -4,17 +4,21 @@ import type { NewOrder } from "@/lib/domain/checkout";
 import type { PublicApi } from "@/server/backend/types";
 
 /**
- * Public demo mode: orders stay in memory, and the dashboard preview can read
+ * Public demo mode: orders stay in the visitor's browser, and the dashboard preview can read
  * but never write. The server-only guard and Next's cookie store are stubbed.
  */
 
 vi.mock("server-only", () => ({}));
 
 const jar = new Map<string, string>();
+const cookieOptions = new Map<string, Record<string, unknown>>();
 vi.mock("next/headers", () => ({
   cookies: async () => ({
     get: (name: string) => (jar.has(name) ? { value: jar.get(name) } : undefined),
-    set: (name: string, value: string) => void jar.set(name, value),
+    set: (name: string, value: string, options: Record<string, unknown> = {}) => {
+      jar.set(name, value);
+      cookieOptions.set(name, options);
+    },
     delete: (name: string) => void jar.delete(name),
   }),
 }));
@@ -51,18 +55,27 @@ beforeEach(() => {
   process.env.PUBLIC_DEMO_MODE = "true";
   process.env.SESSION_SECRET = "x".repeat(40);
   jar.clear();
+  cookieOptions.clear();
 });
 afterEach(() => {
   delete process.env.PUBLIC_DEMO_MODE;
+  vi.useRealTimers();
 });
 
+/** A fresh copy of the module, as a different serverless instance would load it. */
+async function freshInstance() {
+  vi.resetModules();
+  const { withDemoOrders } = await import("./orders");
+  return withDemoOrders(shop);
+}
+
 describe("orders in public demo mode", () => {
-  it("are kept in memory and never reach the database", async () => {
+  it("are kept in the visitor's browser and never reach the database", async () => {
     const { withDemoOrders } = await import("./orders");
     const api = withDemoOrders(shop);
     const { id, number } = await api.createOrder(newOrder, "hash-1");
     expect(shop.createOrder).not.toHaveBeenCalled();
-    expect(number).toBeGreaterThanOrEqual(1001);
+    expect(number).toBeGreaterThanOrEqual(100_000);
 
     expect(await api.findCustomerOrder(id, "wrong")).toBeNull();
     const order = await api.findCustomerOrder(id, "hash-1");
@@ -78,6 +91,100 @@ describe("orders in public demo mode", () => {
     const { withDemoOrders } = await import("./orders");
     await withDemoOrders(shop).loadCatalog();
     expect(shop.loadCatalog).toHaveBeenCalled();
+  });
+
+  it("open on any server instance, on every reload and under concurrent requests", async () => {
+    const { id } = await (await freshInstance()).createOrder(newOrder, "hash-1");
+    const other = await freshInstance();
+    const reads = await Promise.all(Array.from({ length: 20 }, () => other.findCustomerOrder(id, "hash-1")));
+    expect(reads.every((order) => order?.id === id)).toBe(true);
+    expect((await (await freshInstance()).findCustomerOrder(id, "hash-1"))?.customer.name).toBe("Visitor");
+  });
+
+  it("keep the receipt in an HttpOnly cookie for that order's page only, unreadable and for an hour", async () => {
+    const api = await freshInstance();
+    const { id } = await api.createOrder({ ...newOrder, customer: { name: "Private Person", phone: "+15550101", email: "" } }, "hash-1");
+    const name = `demo-order-${id}`;
+    expect(cookieOptions.get(name)).toMatchObject({ httpOnly: true, sameSite: "lax", path: `/orders/${id}`, maxAge: 3600 });
+    const value = jar.get(name)!;
+    expect(value).not.toMatch(/Private|Person|15550101|hash-1/);
+    expect(Buffer.from(value, "base64url").toString("latin1")).not.toMatch(/Private|15550101/);
+  });
+
+  it("give each visitor their own order and number", async () => {
+    const api = await freshInstance();
+    const first = await api.createOrder(newOrder, "hash-a");
+    const firstCookie = jar.get(`demo-order-${first.id}`)!;
+    jar.clear(); // a second visitor's browser
+    const second = await api.createOrder({ ...newOrder, customer: { name: "Other", phone: "", email: "" } }, "hash-b");
+    expect(second.id).not.toBe(first.id);
+    expect(second.number).not.toBe(first.number);
+
+    // Without the first visitor's browser, their link opens nothing.
+    expect(await api.findCustomerOrder(first.id, "hash-a")).toBeNull();
+    expect((await api.findCustomerOrder(second.id, "hash-b"))?.customer.name).toBe("Other");
+    // Their receipt can't be passed off as another order, or opened with another link.
+    jar.set(`demo-order-${second.id}`, firstCookie);
+    expect(await api.findCustomerOrder(second.id, "hash-a")).toBeNull();
+    jar.set(`demo-order-${first.id}`, firstCookie);
+    expect(await api.findCustomerOrder(first.id, "hash-b")).toBeNull();
+    expect((await api.findCustomerOrder(first.id, "hash-a"))?.id).toBe(first.id);
+  });
+
+  it("refuse expired, altered or missing receipts", async () => {
+    vi.useFakeTimers({ now: new Date("2026-10-28T12:00:00Z"), toFake: ["Date"] });
+    const api = await freshInstance();
+    const { id } = await api.createOrder(newOrder, "hash-1");
+    const name = `demo-order-${id}`;
+    const value = jar.get(name)!;
+
+    vi.setSystemTime(new Date("2026-10-28T12:59:00Z"));
+    expect(await api.findCustomerOrder(id, "hash-1")).not.toBeNull();
+    vi.setSystemTime(new Date("2026-10-28T13:00:01Z"));
+    expect(await api.findCustomerOrder(id, "hash-1")).toBeNull();
+    vi.setSystemTime(new Date("2026-10-28T12:30:00Z"));
+
+    const flipped = Buffer.from(value, "base64url");
+    flipped[flipped.length - 1] ^= 1;
+    jar.set(name, flipped.toString("base64url"));
+    expect(await api.findCustomerOrder(id, "hash-1")).toBeNull();
+    jar.set(name, "not-a-receipt");
+    expect(await api.findCustomerOrder(id, "hash-1")).toBeNull();
+    jar.delete(name);
+    expect(await api.findCustomerOrder(id, "hash-1")).toBeNull();
+
+    // Signed with another store's secret.
+    jar.set(name, value);
+    process.env.SESSION_SECRET = "y".repeat(40);
+    expect(await (await freshInstance()).findCustomerOrder(id, "hash-1")).toBeNull();
+  });
+
+  it("record Open WhatsApp only for the visitor's own link", async () => {
+    const api = await freshInstance();
+    const { id } = await api.createOrder(newOrder, "hash-1");
+    expect(await api.markWhatsAppOpened(id, "hash-wrong")).toBe(true);
+    expect((await api.findCustomerOrder(id, "hash-1"))?.status).toBe("prepared");
+    await api.markWhatsAppOpened(id, "hash-1");
+    expect(cookieOptions.get(`demo-order-opened-${id}`)).toMatchObject({ httpOnly: true, path: `/orders/${id}` });
+    expect((await (await freshInstance()).findCustomerOrder(id, "hash-1"))?.status).toBe("opened");
+  });
+
+  it("fit the largest bag checkout accepts into one cookie", async () => {
+    const items = Array.from({ length: 50 }, (_, index) => ({
+      ...newOrder.items[0],
+      productId: crypto.randomUUID(),
+      variantId: crypto.randomUUID(),
+      sku: `SKU-${index}-${crypto.randomUUID()}`,
+      name: `Product with a fairly long descriptive name ${index}`,
+      variantLabel: "Large / Forest green",
+      imageUrl: `https://example.supabase.co/storage/v1/object/public/media/${crypto.randomUUID()}.jpg`,
+    }));
+    const api = await freshInstance();
+    const { id } = await api.createOrder({ ...newOrder, items, customerNote: "n".repeat(500) }, "hash-1");
+    expect(jar.get(`demo-order-${id}`)!.length).toBeLessThanOrEqual(3800);
+    const order = await api.findCustomerOrder(id, "hash-1");
+    expect(order?.items).toHaveLength(50);
+    expect(order?.items[49].name).toBe("Product with a fairly long descriptive name 49");
   });
 });
 
