@@ -59,9 +59,12 @@ Open <http://localhost:3000> — that's the Halden demo store. Nothing to config
 
 ### 3. Deploy to Hostinger
 
-1. Put the project on GitHub (or zip it).
-2. In hPanel, add a **Node.js** website and connect the repository (or upload the zip). Hostinger recognises Next.js and fills in the build settings — keep them. The build command is `npm run build`.
-3. Under **Environment variables**, add these three. Copy each value from your `.env.local` file — it's in the project folder; open it in your code editor, since Finder and Explorer hide files whose name starts with a dot:
+1. Put the project on your own GitHub repository.
+2. In hPanel: **Websites** → **Add Website** → **Web App**.
+3. Choose a domain — the free **Temporary Domain** is fine; you can connect your own later.
+4. Choose **Import Git Repository**, connect GitHub if asked, and select your repository on the **main** branch.
+5. Hostinger detects **Next.js** and fills in the build settings — keep them. Node.js 22 is recommended; another version Hostinger offers (20.9 or newer) works too.
+6. Under **Environment variables**, add these three. Their values are already in your `.env.local` file in the project folder, which `npm run setup` created. Open it in a text editor (Finder and Explorer hide files whose name starts with a dot, so use the editor's **Open** command), copy each value — the part after `=` — and close the file without saving:
 
    | Name | Value |
    | --- | --- |
@@ -69,9 +72,9 @@ Open <http://localhost:3000> — that's the Halden demo store. Nothing to config
    | `SUPABASE_PUBLISHABLE_KEY` | from `.env.local` |
    | `SUPABASE_SECRET_KEY` | from `.env.local` — keep it secret |
 
-   That's all the store needs. Hostinger may list other names it finds in the code; you don't need them ([what they are](docs/advanced-configuration.md)).
+   That's all the store needs. Hostinger may list other names it finds in the code; you don't need them ([what they are](docs/advanced-configuration.md)). Never paste these values into GitHub, a chat or an email.
 
-4. Deploy. Open `https://your-domain/admin`, sign in, and set **Settings → Store → Shop address** to your site's address.
+7. Click **Deploy**. When it finishes, open `https://your-domain/admin`, sign in, and set **Settings → Store → Shop address** to your site's address.
 
 Your store is live. Everything else — store name, logo, currency, WhatsApp number, checkout methods, delivery, colours, the homepage — is set in the dashboard.
 
