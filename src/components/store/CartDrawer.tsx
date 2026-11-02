@@ -7,6 +7,7 @@ import { useCartQuote } from "@/lib/cart/useCartQuote";
 import { buttonClass } from "@/components/ui/button";
 import { Drawer } from "@/components/ui/Drawer";
 import { CartLines, FreeShippingMeter } from "./CartLines";
+import { CheckoutLink } from "./CheckoutLink";
 import { useStore } from "./StoreProvider";
 
 export function CartDrawer() {
@@ -31,14 +32,13 @@ export function CartDrawer() {
           <Link href="/cart" onClick={close} className={buttonClass({ variant: "outline", full: true })}>
             {t.cart.viewCart}
           </Link>
-          <Link
-            href="/checkout"
+          <CheckoutLink
             onClick={close}
             aria-disabled={!quote.orderable}
             className={buttonClass({ variant: "primary", full: true, className: !quote.orderable ? "pointer-events-none opacity-50" : "" })}
           >
             {t.cart.checkout}
-          </Link>
+          </CheckoutLink>
         </div>
       </div>
     ) : null;

@@ -36,6 +36,19 @@ function supabaseImageHosts() {
   return patterns;
 }
 
+/**
+ * Who may show these pages inside a frame. A real store: only itself
+ * (X-Frame-Options: SAMEORIGIN). The public demo (PUBLIC_DEMO_MODE, read with the
+ * same rule as src/server/env.ts): itself and the Profit Studio Live Demo showcase,
+ * https://profitstudio.app/demo/halden — and nothing else. CSP frame-ancestors
+ * replaces X-Frame-Options there, because SAMEORIGIN cannot name another origin and
+ * browsers ignore X-Frame-Options whenever frame-ancestors is present.
+ */
+const publicDemo = /^(1|true|yes|on)$/i.test(process.env.PUBLIC_DEMO_MODE ?? "");
+const framingHeader = publicDemo
+  ? { key: "Content-Security-Policy", value: "frame-ancestors 'self' https://profitstudio.app" }
+  : { key: "X-Frame-Options", value: "SAMEORIGIN" };
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -70,7 +83,7 @@ const nextConfig = {
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          framingHeader,
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=(), payment=()",
@@ -78,11 +91,14 @@ const nextConfig = {
         ],
       },
       {
-        // The dashboard is never indexed and never framed.
+        // The dashboard is never indexed and never framed — not even by the showcase.
+        // frame-ancestors 'none' replaces the CSP the rule above may set (a later rule
+        // wins for the same key), because a frame-ancestors directive overrides DENY.
         source: "/admin/:path*",
         headers: [
           { key: "X-Robots-Tag", value: "noindex, nofollow" },
           { key: "X-Frame-Options", value: "DENY" },
+          { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
         ],
       },
     ];

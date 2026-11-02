@@ -61,6 +61,30 @@ export function parseCartLines(raw: unknown): CartLine[] {
   return [...merged.values()];
 }
 
+/**
+ * The bag as one URL value — ids and quantities only, never a price — for the
+ * public demo's hand-off from a framed preview to a new tab (see CheckoutLink).
+ * A framed page's storage is kept apart from the same site opened directly, so
+ * the bag has to travel with the link. Decoding goes through parseCartLines, so
+ * a hand-edited link can never add more than a hand-edited bag could.
+ */
+export function encodeCartHandoff(lines: CartLine[]): string {
+  return JSON.stringify(lines.map(({ productId, variantId, quantity }) => [productId, variantId, quantity]));
+}
+
+export function decodeCartHandoff(value: string | null | undefined): CartLine[] {
+  if (!value || value.length > 8000) return [];
+  try {
+    const raw: unknown = JSON.parse(value);
+    if (!Array.isArray(raw)) return [];
+    return parseCartLines(
+      raw.map((entry) => (Array.isArray(entry) ? { productId: entry[0], variantId: entry[1], quantity: entry[2] } : null)),
+    );
+  } catch {
+    return [];
+  }
+}
+
 /* ------------------------------------------------------------------ quote */
 
 export type QuoteLineStatus = "ok" | "adjusted" | "unavailable";

@@ -6,6 +6,7 @@ import { useCartLines } from "@/lib/cart/store";
 import { useCartQuote } from "@/lib/cart/useCartQuote";
 import { buttonClass } from "@/components/ui/button";
 import { CartLines, FreeShippingMeter } from "./CartLines";
+import { CheckoutLink } from "./CheckoutLink";
 import { Receipt, ReceiptLine, ReceiptRule } from "./Receipt";
 import { useStore } from "./StoreProvider";
 
@@ -47,8 +48,7 @@ export function CartPage() {
           <ReceiptRule />
           <ReceiptLine label={t.cart.shipping} amount={t.cart.shippingAtCheckout} muted />
         </Receipt>
-        <Link
-          href="/checkout"
+        <CheckoutLink
           aria-disabled={!quote.orderable}
           className={buttonClass({
             size: "lg",
@@ -57,7 +57,7 @@ export function CartPage() {
           })}
         >
           {t.cart.checkout}
-        </Link>
+        </CheckoutLink>
         <Link href="/shop" className="mt-4 block text-center text-sm font-medium underline-offset-4 hover:underline">
           {t.common.continueShopping}
         </Link>

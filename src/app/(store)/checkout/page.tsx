@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AdoptHandedOffCart } from "@/components/store/AdoptHandedOffCart";
 import { CheckoutForm } from "@/components/store/CheckoutForm";
 import { DemoNotice } from "@/components/store/Demo";
 import { Container } from "@/components/store/HomeSections";
@@ -23,6 +24,7 @@ export default async function CheckoutPage() {
           <DemoNotice>{t.demo.checkout}</DemoNotice>
         </div>
       )}
+      {publicDemoMode() && <AdoptHandedOffCart />}
       <CheckoutForm formToken={await issueFormToken()} />
     </Container>
   );

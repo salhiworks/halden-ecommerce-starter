@@ -104,6 +104,11 @@ export function clearCart() {
   update(() => []);
 }
 
+/** Replaces the bag with one handed over in a link (public demo only — see CheckoutLink). */
+export function adoptCart(lines: CartLine[]) {
+  if (lines.length > 0) update(() => lines);
+}
+
 /* -------------------------------------------------------- drawer state */
 
 let drawerOpen = false;

@@ -1,5 +1,5 @@
 import { Info } from "lucide-react";
-import Link from "next/link";
+import { DemoExploreLink } from "./DemoExploreLink";
 import type { Dictionary } from "@/lib/i18n";
 
 /**
@@ -13,12 +13,12 @@ export function DemoBar({ storeName, t }: { storeName: string; t: Dictionary }) 
     <div className="bg-ink text-paper" data-testid="demo-bar">
       <p className="mx-auto flex max-w-[90rem] flex-wrap items-center justify-center gap-x-3 gap-y-0.5 px-4 py-2 text-center text-[0.78rem]">
         <span>{t.demo.bar(storeName)}</span>
-        <Link href="/admin/login" className="font-semibold underline underline-offset-4">
+        <DemoExploreLink className="font-semibold underline underline-offset-4">
           {t.demo.explore}
           <span aria-hidden="true" className="flip-rtl ms-1 inline-block">
             →
           </span>
-        </Link>
+        </DemoExploreLink>
       </p>
     </div>
   );
