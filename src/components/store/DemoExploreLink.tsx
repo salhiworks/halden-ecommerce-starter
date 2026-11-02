@@ -5,12 +5,14 @@ import type { ReactNode } from "react";
 import { useFramed } from "@/lib/framed";
 
 /**
- * Runs where the server HTML puts it — right after the link, while the page is
+ * Runs where the server HTML puts it — just BEFORE the link, while the page is
  * still loading — so a framed page opens the dashboard in a new tab from the first
- * moment the link can be clicked, before React has hydrated. Outside a frame it
+ * moment the link exists, before React has hydrated. It listens for the click (in
+ * the capture phase, ahead of React and next/link) and gives the link its new-tab
+ * target just in time; the browser then follows it natively. Outside a frame it
  * does nothing. Same test as useFramed (src/lib/framed.ts).
  */
-const NEW_TAB_WHEN_FRAMED = `(function(){var f;try{f=window.self!==window.top}catch(e){f=true}if(!f)return;var a=document.querySelectorAll("a[data-demo-explore]");for(var i=0;i<a.length;i++){a[i].target="_blank";a[i].rel="noopener"}})()`;
+const NEW_TAB_WHEN_FRAMED = `(function(){var f;try{f=window.self!==window.top}catch(e){f=true}if(!f||window.__demoExploreNewTab)return;window.__demoExploreNewTab=1;document.addEventListener("click",function(e){var a=e.target&&e.target.closest&&e.target.closest("a[data-demo-explore]");if(a){a.target="_blank";a.rel="noopener"}},true)})()`;
 
 /**
  * The demo band's "Explore the dashboard". The dashboard is never shown inside
@@ -22,17 +24,17 @@ export function DemoExploreLink({ className, children }: { className?: string; c
   const framed = useFramed();
   return (
     <>
+      <script dangerouslySetInnerHTML={{ __html: NEW_TAB_WHEN_FRAMED }} />
       {framed ? (
         <a href="/admin/login" target="_blank" rel="noopener" className={className} data-demo-explore="">
           {children}
         </a>
       ) : (
-        // The script below may already have given this link its new-tab target.
+        // The script above may already have given this link its new-tab target.
         <Link href="/admin/login" className={className} data-demo-explore="" suppressHydrationWarning>
           {children}
         </Link>
       )}
-      <script dangerouslySetInnerHTML={{ __html: NEW_TAB_WHEN_FRAMED }} />
     </>
   );
 }
